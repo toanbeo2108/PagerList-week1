@@ -1,0 +1,174 @@
+﻿@model IEnumerable<Thực_tập_tuần_1.Models.Work>
+
+@{
+    ViewData["Title"] = "FinalTest";
+    PagerModel pager = ViewBag.Pager;
+}
+<link rel="stylesheet" href="https://use.fontawesome.com/release/v5.7.0/css/all.css"></link>
+<h1>FinalTest</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+<form asp-action="FinalTest" method="get" role="search">
+    <div class="form-actions no-color">
+        <p>
+            Find by name: <input type="text" name="SearchString" value="@ViewBag.SearchString" />
+            <input type="submit" value="Search" class="btn btn-outline-success" /> |
+            <a asp-action="FinalTest">Back to Full List</a>
+        </p>
+        <div />
+</form>
+
+<p>Lọc theo : </p>
+<select id="pageSelector" asp-items="pager.GetStatus()" onchange="changeStatus(this)">
+</select>
+<div class="container mt-1">
+    <ul class="justify-content-end pagination">
+        @if (pager.CurrentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                       asp-action="@pager.Action"
+                       asp-route-pageSize="@pager.PageSize"
+                       asp-route-status="@pager.Status"
+                       asp-route-pg="1"
+                       asp-route-SearchString="@pager.SearchString"
+                       asp-route-sortExpresstion="@pager.Sortexpression">
+                    First
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link"
+                       asp-route-status="@pager.Status"
+                       asp-route-pageSize="@pager.PageSize"
+                       asp-action="@pager.Action"
+                       asp-route-pg="@(pager.CurrentPage - 1)"
+                       asp-route-SearchString="@pager.SearchString"
+                       asp-route-sortExpresstion="@pager.Sortexpression">
+                    Previous
+                </a>
+            </li>
+        }
+        @for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+        {
+            <li class="page-item @(pge == pager.CurrentPage ? "active" : "")">
+                @if (pge != pager.CurrentPage)
+                {
+                    <a class="page-link"
+                       asp-action="@pager.Action"
+                       asp-route-status="@pager.Status"
+                       asp-route-pageSize="@pager.PageSize"
+                       asp-route-SearchString="@pager.SearchString"
+                       asp-route-sortExpresstion="@pager.Sortexpression"
+                       asp-route-pg="@pge">
+                        @pge
+                    </a>
+                }else
+                {
+                    <span class="page-link">@pge</span>
+                }
+                
+            </li>
+        }
+
+        @if (pager.CurrentPage < pager.TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                    asp-route-status="@pager.Status"
+                    asp-action="@pager.Action"
+                    asp-route-pageSize="@pager.PageSize"
+                   asp-route-pg="@(pager.CurrentPage + 1)"
+                   asp-route-SearchString="@pager.SearchString"
+                   asp-route-sortExpresstion="@pager.Sortexpression">
+                    Next
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link"
+                   asp-route-status="@pager.Status"
+                   asp-action="@pager.Action"
+                    asp-route-pageSize="@pager.PageSize"
+                   asp-route-pg="@(pager.TotalPages)"
+                   asp-route-SearchString="@pager.SearchString"
+                   asp-route-sortExpresstion="@pager.Sortexpression">
+                    Last
+                </a>
+            </li>
+        }
+    </ul>
+</div>
+<table class="table">
+    <thead>
+        <th>
+        <a asp-action="FinalTest" asp-route-pageSize="@pager.PageSize" asp-route-status="@pager.Status" asp-route-sortExpresstion="@ViewData["SortParamName"]" asp-route-SearchString="@pager.SearchString">Name</a>
+        </th>
+        <th>
+            Description
+        </th>
+        <th>
+            StartTime
+        </th>
+        <th>
+        <a asp-action="FinalTest" asp-route-pageSize="@pager.PageSize" asp-route-status="@pager.Status" asp-route-sortExpresstion="@ViewData["SortParamWorkTime"]" asp-route-SearchString="@pager.SearchString">WorkTime</a>
+        </th>
+        <th>
+            Status
+        </th>
+        <th></th>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StartTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.WorkTime)
+            </td>
+            <td>
+                    @if (item.Status == 1)
+                    {
+                        <p>Cần làm</p>
+                    }
+                    else if (item.Status == 2)
+                    {
+                        <p>Đang làm</p>
+                    }
+                    else
+                    {
+                        <p>Đã làm xong</p>
+                    }
+            </td>
+            <td>
+                <a asp-action="Update" asp-controller="Work" asp-route-id="@item.IdWork" class="btn btn-primary">Update</a>
+                <a asp-action="Delete" asp-controller="Work" asp-route-id="@item.IdWork" class="btn btn-primary">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<p>Hiển thị : </p>
+<select id="pageSelector" asp-items="pager.GetPageSize()" onchange="changePageSize(this)">
+</select>
+<script>
+    function changePageSize(obj) 
+    {
+        var controllerName = '@this.ViewContext.RouteData.Values["controller"].ToString()';
+        window.location.href = '/' + controllerName + '/@pager.Action' + '?pageSize=' + obj.value + "&status=@pager.Status" + "&sortExpresstion = @pager.Sortexpression" + "&searchString=@pager.SearchString";
+    }
+    function changeStatus(obj) {
+        var controllerName = '@this.ViewContext.RouteData.Values["controller"].ToString()';
+        window.location.href = '/' + controllerName + '/@pager.Action' + '?pageSize=@pager.PageSize' + '&status=' + obj.value + "&sortExpresstion = @pager.Sortexpression" + "&searchString=@pager.SearchString";
+    }
+</script>
+
+
